@@ -1,0 +1,13 @@
+[package]
+name = "gmp-sys"
+version = "0.0.1"
+authors = ["Vladimir Matveev <vladimir.matweev@gmail.com>"]
+links = "gmp"
+build = "build.rs"
+
+[lib]
+name = "gmp-sys"
+path = "lib.rs"
+
+[build-dependencies.pkg-config]
+git = "https://github.com/alexcrichton/pkg-config-rs"
