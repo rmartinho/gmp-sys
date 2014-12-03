@@ -1,20 +1,47 @@
-extern crate "pkg-config" as pkg_config;
+#![feature(if_let)]
 
 use std::os;
-use std::io::{mod, fs, Command};
+use std::io::{mod, fs, Command, BufReader};
 use std::io::process::InheritFd;
 use std::io::fs::PathExtensions;
 
 const GMP_NAME: &'static str = "libgmp";
 const GMP_VERSION: &'static str = "6.0.0";
 
-fn main() {
-    let mut opts = pkg_config::default_options(GMP_NAME);
-    opts.atleast_version = Some(GMP_VERSION.into_string());
-    match pkg_config::find_library_opts(GMP_NAME, &opts) {
-        Ok(_) => return,
-        Err(..) => {}
+#[cfg(unix)]
+fn check_library(name: &str) -> bool {
+    // First check whether ldconfig utility is available (if we're on linux)
+    if let Ok(po) = Command::new("ldcoig").arg("-p").output() {
+        let target = os::getenv("TARGET").unwrap();
+        let is_64bit = target.contains("x86_64");
+        if po.output.len() > 0 {
+            let mut br = BufReader::new(&*po.output);
+            return br.lines().map(|l| l.unwrap())
+                .any(|l| l.contains(name) && if is_64bit { l.contains("x86-64") }
+                                             else { true })
+        }
     }
+
+    // If it fails, then check common system libraries directories
+    for &dir in ["/lib", "/usr/lib", "/usr/local/lib"].iter() {
+        let p = Path::new(dir).join(format!("{}.so", GMP_NAME));
+        if p.exists() { return true; }
+    }
+
+    // Nothing found, build the lib from scratch
+    false
+}
+
+// Windows does not have predefined locations with libraries, sorry
+#[cfg(windows)]
+fn check_library(name: &str) -> bool {
+    false
+}
+
+fn main() {
+    // GMP does not support pkg-config :(
+    // Try to guess its presence manually
+    if check_library(GMP_NAME) { return; }
 
     // Bind some useful paths
 

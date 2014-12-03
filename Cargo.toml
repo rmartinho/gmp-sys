@@ -8,6 +8,3 @@ build = "build.rs"
 [lib]
 name = "gmp-sys"
 path = "lib.rs"
-
-[build-dependencies.pkg-config]
-git = "https://github.com/alexcrichton/pkg-config-rs"
