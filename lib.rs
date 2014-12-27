@@ -1,4 +1,4 @@
-#![allow(non_camel_case_types)]
+#![allow(non_camel_case_types, raw_pointer_deriving)]
 extern crate libc;
 use libc::size_t;
 
@@ -8,6 +8,7 @@ pub type mp_limb_t = ::libc::c_ulong;
 pub type mp_limb_signed_t = ::libc::c_long;
 pub type mp_bitcnt_t = ::libc::c_ulong;
 #[repr(C)]
+#[deriving(Copy)]
 pub struct Struct_Unnamed1 {
     pub _mp_alloc: ::libc::c_int,
     pub _mp_size: ::libc::c_int,
@@ -21,6 +22,7 @@ pub type mp_srcptr = *const mp_limb_t;
 pub type mp_size_t = ::libc::c_long;
 pub type mp_exp_t = ::libc::c_long;
 #[repr(C)]
+#[deriving(Copy)]
 pub struct Struct_Unnamed2 {
     pub _mp_num: __mpz_struct,
     pub _mp_den: __mpz_struct,
@@ -29,6 +31,7 @@ pub type __mpq_struct = Struct_Unnamed2;
 pub type MP_RAT = __mpq_struct;
 pub type mpq_t = [__mpq_struct, ..1u];
 #[repr(C)]
+#[deriving(Copy)]
 pub struct Struct_Unnamed3 {
     pub _mp_prec: ::libc::c_int,
     pub _mp_size: ::libc::c_int,
@@ -42,12 +45,14 @@ pub const GMP_RAND_ALG_DEFAULT: ::libc::c_uint = 0;
 pub const GMP_RAND_ALG_LC: ::libc::c_uint = 0;
 pub type gmp_randalg_t = Enum_Unnamed4;
 #[repr(C)]
+#[deriving(Copy)]
 pub struct Struct_Unnamed5 {
     pub _mp_seed: mpz_t,
     pub _mp_alg: gmp_randalg_t,
     pub _mp_algdata: Union_Unnamed6,
 }
 #[repr(C)]
+#[deriving(Copy)]
 pub struct Union_Unnamed6 {
     pub data: [u64, ..1u],
 }

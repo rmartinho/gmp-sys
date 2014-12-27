@@ -1,5 +1,3 @@
-#![feature(if_let)]
-
 use std::os;
 use std::io::{mod, fs, Command, BufReader};
 use std::io::process::InheritFd;
@@ -11,20 +9,20 @@ const GMP_VERSION: &'static str = "6.0.0";
 #[cfg(unix)]
 fn check_library(name: &str) -> bool {
     // First check whether ldconfig utility is available (if we're on linux)
-    if let Ok(po) = Command::new("ldcoig").arg("-p").output() {
+    if let Ok(po) = Command::new("ldconfig").arg("-p").output() {
         let target = os::getenv("TARGET").unwrap();
         let is_64bit = target.contains("x86_64");
+        let pattern = format!("{}.so (libc6{})", name, if is_64bit { ",x86-64" } else { "" });
         if po.output.len() > 0 {
             let mut br = BufReader::new(&*po.output);
             return br.lines().map(|l| l.unwrap())
-                .any(|l| l.contains(name) && if is_64bit { l.contains("x86-64") }
-                                             else { true })
+                .any(|l| l.contains(&*pattern))
         }
     }
 
     // If it fails, then check common system libraries directories
     for &dir in ["/lib", "/usr/lib", "/usr/local/lib"].iter() {
-        let p = Path::new(dir).join(format!("{}.so", GMP_NAME));
+        let p = Path::new(dir).join(format!("{}.so", name));
         if p.exists() { return true; }
     }
 
@@ -98,7 +96,7 @@ fn run_build(gmp_src_root: &Path,
     fs::mkdir(gmp_build_dir, io::USER_DIR).unwrap();
 
     let config_opts = vec![
-        "--enable-shared=no".into_string() // TODO: why?
+        "--enable-shared=no".to_string() // TODO: why?
     ];
 
     // Run configure
