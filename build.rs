@@ -44,7 +44,7 @@ fn main() {
     // Bind some useful paths
 
     let project_src_root = Path::new(os::getenv("CARGO_MANIFEST_DIR").unwrap());
-    let gmp_src_root = project_src_root.join([GMP_NAME, "-", GMP_VERSION].concat());
+    let gmp_src_root = project_src_root.join::<String>([GMP_NAME, "-", GMP_VERSION].concat());
 
     let out_dir = Path::new(os::getenv("OUT_DIR").unwrap());
 
