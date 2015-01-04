@@ -1,5 +1,5 @@
 use std::os;
-use std::io::{mod, fs, Command, BufReader};
+use std::io::{self, fs, Command, BufReader};
 use std::io::process::InheritFd;
 use std::io::fs::PathExtensions;
 
