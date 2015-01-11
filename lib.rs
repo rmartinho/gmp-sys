@@ -1,4 +1,4 @@
-#![allow(non_camel_case_types, raw_pointer_deriving)]
+#![allow(non_camel_case_types, raw_pointer_derive, unstable)]
 extern crate libc;
 use libc::size_t;
 
@@ -16,7 +16,7 @@ pub struct Struct_Unnamed1 {
 }
 pub type __mpz_struct = Struct_Unnamed1;
 pub type MP_INT = __mpz_struct;
-pub type mpz_t = [__mpz_struct; 1u];
+pub type mpz_t = [__mpz_struct; 1us];
 pub type mp_ptr = *mut mp_limb_t;
 pub type mp_srcptr = *const mp_limb_t;
 pub type mp_size_t = ::libc::c_long;
@@ -29,7 +29,7 @@ pub struct Struct_Unnamed2 {
 }
 pub type __mpq_struct = Struct_Unnamed2;
 pub type MP_RAT = __mpq_struct;
-pub type mpq_t = [__mpq_struct; 1u];
+pub type mpq_t = [__mpq_struct; 1us];
 #[repr(C)]
 #[derive(Copy)]
 pub struct Struct_Unnamed3 {
@@ -39,7 +39,7 @@ pub struct Struct_Unnamed3 {
     pub _mp_d: *mut mp_limb_t,
 }
 pub type __mpf_struct = Struct_Unnamed3;
-pub type mpf_t = [__mpf_struct; 1u];
+pub type mpf_t = [__mpf_struct; 1us];
 pub type Enum_Unnamed4 = ::libc::c_uint;
 pub const GMP_RAND_ALG_DEFAULT: ::libc::c_uint = 0;
 pub const GMP_RAND_ALG_LC: ::libc::c_uint = 0;
@@ -54,7 +54,7 @@ pub struct Struct_Unnamed5 {
 #[repr(C)]
 #[derive(Copy)]
 pub struct Union_Unnamed6 {
-    pub data: [u64; 1u],
+    pub data: [u64; 1us],
 }
 impl Union_Unnamed6 {
     pub fn _mp_lc(&mut self) -> *mut *mut ::libc::c_void {
@@ -62,7 +62,7 @@ impl Union_Unnamed6 {
     }
 }
 pub type __gmp_randstate_struct = Struct_Unnamed5;
-pub type gmp_randstate_t = [__gmp_randstate_struct; 1u];
+pub type gmp_randstate_t = [__gmp_randstate_struct; 1us];
 pub type mpz_srcptr = *const __mpz_struct;
 pub type mpz_ptr = *mut __mpz_struct;
 pub type mpf_srcptr = *const __mpf_struct;

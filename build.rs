@@ -1,3 +1,5 @@
+#![allow(unstable)]
+
 use std::os;
 use std::io::{self, fs, Command, BufReader};
 use std::io::process::InheritFd;
