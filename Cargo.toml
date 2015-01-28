@@ -1,6 +1,6 @@
 [package]
 name = "gmp-sys"
-version = "0.0.6"
+version = "0.0.7"
 authors = ["Vladimir Matveev <vladimir.matweev@gmail.com>"]
 links = "gmp"
 build = "build.rs"

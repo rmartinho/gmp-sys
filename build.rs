@@ -1,9 +1,10 @@
 #![allow(unstable)]
 
 use std::os;
-use std::io::{self, fs, Command, BufReader};
-use std::io::process::InheritFd;
-use std::io::fs::PathExtensions;
+use std::old_io as io;
+use std::old_io::{fs, Command, BufReader};
+use std::old_io::process::InheritFd;
+use std::old_io::fs::PathExtensions;
 
 const GMP_NAME: &'static str = "libgmp";
 const GMP_VERSION: &'static str = "6.0.0";
