@@ -14,7 +14,7 @@ fn check_library(name: &str) -> bool {
         let target = env::var("TARGET").unwrap();
         let is_64bit = target.contains("x86_64");
         let pattern = format!("{}.so (libc6{})", name, if is_64bit { ",x86-64" } else { "" });
-        if po.stdout.len() > 0 {
+        if !po.stdout.is_empty() {
             let br = BufReader::new(&*po.stdout);
             return br.lines().map(|l| l.unwrap())
                 .any(|l| l.contains(&*pattern))
@@ -22,7 +22,7 @@ fn check_library(name: &str) -> bool {
     }
 
     // If it fails, then check common system libraries directories
-    for &dir in ["/lib", "/usr/lib", "/usr/local/lib"].iter() {
+    for &dir in &["/lib", "/usr/lib", "/usr/local/lib"] {
         let p = Path::new(dir).join(format!("{}.so", name));
         if p.exists() { return true; }
     }
@@ -78,7 +78,7 @@ fn run_build(gmp_src_root: &Path,
     //
     let target = env::var("TARGET").unwrap();
 
-    let mut cflags = env::var("CFLAGS").unwrap_or(String::new());
+    let mut cflags = env::var("CFLAGS").unwrap_or_else(|_| String::new());
     cflags.push_str(" -ffunction-sections -fdata-sections");
     if target.contains("i686") {
         cflags.push_str(" -m32");
