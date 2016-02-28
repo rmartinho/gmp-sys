@@ -1,10 +1,8 @@
-#![allow(unstable)]
-
-use std::os;
-use std::old_io as io;
-use std::old_io::{fs, Command, BufReader};
-use std::old_io::process::InheritFd;
-use std::old_io::fs::PathExtensions;
+use std::process::Command;
+use std::{env, fs};
+use std::io::prelude::*;
+use std::io::BufReader;
+use std::path::{Path, PathBuf};
 
 const GMP_NAME: &'static str = "libgmp";
 const GMP_VERSION: &'static str = "6.0.0";
@@ -13,11 +11,11 @@ const GMP_VERSION: &'static str = "6.0.0";
 fn check_library(name: &str) -> bool {
     // First check whether ldconfig utility is available (if we're on linux)
     if let Ok(po) = Command::new("ldconfig").arg("-p").output() {
-        let target = os::getenv("TARGET").unwrap();
+        let target = env::var("TARGET").unwrap();
         let is_64bit = target.contains("x86_64");
         let pattern = format!("{}.so (libc6{})", name, if is_64bit { ",x86-64" } else { "" });
-        if po.output.len() > 0 {
-            let mut br = BufReader::new(&*po.output);
+        if po.stdout.len() > 0 {
+            let br = BufReader::new(&*po.stdout);
             return br.lines().map(|l| l.unwrap())
                 .any(|l| l.contains(&*pattern))
         }
@@ -46,10 +44,10 @@ fn main() {
 
     // Bind some useful paths
 
-    let project_src_root = Path::new(os::getenv("CARGO_MANIFEST_DIR").unwrap());
+    let project_src_root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let gmp_src_root = project_src_root.join::<String>([GMP_NAME, "-", GMP_VERSION].concat());
 
-    let out_dir = Path::new(os::getenv("OUT_DIR").unwrap());
+    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
     let gmp_build_dir = out_dir.join("build");
 
@@ -58,10 +56,10 @@ fn main() {
     let gmp_out_include_dir = gmp_out_dir.join("include");
 
     // Do not rebuild libgmp if it had already been built
-    
+
     if !(gmp_out_lib_dir.exists() && gmp_out_lib_dir.join("libgmp.a").exists() &&
          gmp_out_include_dir.exists() && gmp_out_include_dir.join("gmp.h").exists()) {
-        run_build(&gmp_src_root, &gmp_build_dir, 
+        run_build(&gmp_src_root, &gmp_build_dir,
                   &gmp_out_dir, &gmp_out_lib_dir, &gmp_out_include_dir);
     }
 
@@ -78,25 +76,25 @@ fn run_build(gmp_src_root: &Path,
              gmp_out_include_dir: &Path) {
     // let windows = target.contains("windows") || target.contains("mingw");
     //
-    let target = os::getenv("TARGET").unwrap();
+    let target = env::var("TARGET").unwrap();
 
-    let mut cflags = os::getenv("CFLAGS").unwrap_or(String::new());
+    let mut cflags = env::var("CFLAGS").unwrap_or(String::new());
     cflags.push_str(" -ffunction-sections -fdata-sections");
     if target.contains("i686") {
         cflags.push_str(" -m32");
-    } else if target.as_slice().contains("x86_64") {
+    } else if target.contains("x86_64") {
         cflags.push_str(" -m64");
     }
     if !target.contains("i686") {
         cflags.push_str(" -fPIC");
-    }    
+    }
 
-    let _ = fs::rmdir_recursive(gmp_build_dir);
-    let _ = fs::rmdir_recursive(gmp_out_dir);
+    let _ = fs::remove_dir_all(gmp_build_dir);
+    let _ = fs::remove_dir_all(gmp_out_dir);
 
-    let _ = fs::mkdir_recursive(gmp_out_lib_dir, io::USER_DIR);
-    let _ = fs::mkdir_recursive(gmp_out_include_dir, io::USER_DIR);
-    fs::mkdir(gmp_build_dir, io::USER_DIR).unwrap();
+    let _ = fs::create_dir_all(gmp_out_lib_dir);
+    let _ = fs::create_dir_all(gmp_out_include_dir);
+    fs::create_dir(gmp_build_dir).unwrap();
 
     let config_opts = vec![
         "--enable-shared=no".to_string() // TODO: why?
@@ -105,18 +103,18 @@ fn run_build(gmp_src_root: &Path,
     // Run configure
     run(Command::new("sh")
                 .env("CFLAGS", cflags)
-                .cwd(gmp_build_dir)
+                .current_dir(gmp_build_dir)
                 .arg("-c")
                 .arg(format!(
-                    "{} {}", 
+                    "{} {}",
                     gmp_src_root.join("configure").display(),
-                    config_opts.connect(" ")
+                    config_opts.join(" ")
                 ).replace("C:\\", "/c/").replace("\\", "/")));
 
     // Run make
     run(Command::new(make())
-       .arg(format!("-j{}", os::getenv("NUM_JOBS").unwrap()))
-       .cwd(gmp_build_dir));
+       .arg(format!("-j{}", env::var("NUM_JOBS").unwrap()))
+       .current_dir(gmp_build_dir));
 
     // Copy the library archive file
     let p1 = gmp_build_dir.join(".libs/libgmp.a");
@@ -126,7 +124,7 @@ fn run_build(gmp_src_root: &Path,
     } else {
         fs::rename(&p2, &gmp_out_lib_dir.join("libgmp.a")).unwrap();
     }
-    
+
     // Copy the single include file
     fs::copy(&gmp_build_dir.join("gmp.h"), &gmp_out_include_dir.join("gmp.h")).unwrap();
 }
@@ -142,12 +140,12 @@ fn make() -> &'static str {
 }
 
 fn run(cmd: &mut Command) {
+    use std::process::Stdio;
+
     println!("running: {:?}", cmd);
-    assert!(cmd.stdout(InheritFd(1))
-            .stderr(InheritFd(2))
-            .status()
-            .unwrap()
-            .success());
+    assert!(cmd.stdout(Stdio::inherit())
+               .stderr(Stdio::inherit())
+               .status()
+               .unwrap()
+               .success());
 }
-
-
