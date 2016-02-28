@@ -40,7 +40,10 @@ fn check_library(name: &str) -> bool {
 fn main() {
     // GMP does not support pkg-config :(
     // Try to guess its presence manually
-    if check_library(GMP_NAME) { return; }
+    if check_library(GMP_NAME) {
+        println!("cargo:rustc-link-lib=gmp");
+        return;
+    }
 
     // Bind some useful paths
 
