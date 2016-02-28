@@ -70,7 +70,7 @@ pub type gmp_randalg_t = Enum_Unnamed4;
 #[repr(C)]
 #[derive(Copy)]
 pub struct Struct_Unnamed5 {
-    pub _mp_seed: mpz_t,
+    pub _mp_seed: __mpz_struct,
     pub _mp_alg: gmp_randalg_t,
     pub _mp_algdata: Union_Unnamed6,
 }
