@@ -63,11 +63,9 @@ impl ::std::default::Default for Struct_Unnamed3 {
 }
 pub type __mpf_struct = Struct_Unnamed3;
 pub type mpf_t = [__mpf_struct; 1usize];
-pub const GMP_RAND_ALG_LC: Enum_Unnamed4 =
-    Enum_Unnamed4::GMP_RAND_ALG_DEFAULT;
-#[derive(Clone, Copy)]
-#[repr(u32)]
-pub enum Enum_Unnamed4 { GMP_RAND_ALG_DEFAULT = 0, }
+pub type Enum_Unnamed4 = ::libc::c_uint;
+pub const GMP_RAND_ALG_DEFAULT: ::libc::c_uint = 0;
+pub const GMP_RAND_ALG_LC: ::libc::c_uint = 0;
 pub type gmp_randalg_t = Enum_Unnamed4;
 #[repr(C)]
 #[derive(Copy)]
