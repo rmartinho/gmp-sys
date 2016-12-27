@@ -41,7 +41,7 @@ fn main() {
     // GMP does not support pkg-config :(
     // Try to guess its presence manually
     if check_library(GMP_NAME) {
-        println!("cargo:rustc-link-lib=gmp");
+        println!("cargo:rustc-link-lib=static=gmp");
         return;
     }
 
@@ -133,9 +133,10 @@ fn run_build(gmp_src_root: &Path,
 }
 
 fn emit_cargo_config(lib_dir: &Path, include_dir: &Path) {
-    println!("cargo:rustc-flags=-L {} -l gmp:static", lib_dir.display());
+    println!("cargo:rustc-flags=-L {}", lib_dir.display());
     println!("cargo:libdir={}", lib_dir.display());
     println!("cargo:include={}", include_dir.display());
+    println!("cargo:rustc-link-lib=static=gmp");
 }
 
 fn make() -> &'static str {
